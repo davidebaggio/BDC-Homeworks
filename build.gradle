@@ -18,4 +18,4 @@ dependencies {
     implementation 'org.apache.spark:spark-mllib_2.12:3.5.1'
 }
 
-mainClassName = 'GxxHW1'
+mainClassName = 'G48HW2'

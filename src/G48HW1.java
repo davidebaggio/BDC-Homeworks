@@ -11,7 +11,7 @@ import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import scala.Tuple2;
 
-public class GxxHW1 {
+public class G48HW1 {
 
 	public static void printInfo(String info) {
 		// System.out.println("***************************************************************");
@@ -113,7 +113,7 @@ public class GxxHW1 {
 		Logger.getLogger("akka").setLevel(Level.OFF);
 		Logger.getRootLogger().setLevel(Level.OFF);
 
-		SparkConf conf = new SparkConf(true).setAppName("GxxHW1").setMaster("local");
+		SparkConf conf = new SparkConf(true).setAppName("G48HW1").setMaster("local");
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		sc.setLogLevel("OFF");
 		JavaRDD<String> docs = sc.textFile(inputPath);
@@ -142,7 +142,7 @@ public class GxxHW1 {
 		printInfo("Phi(A, B, C) = " + fairObjective);
 		MRPrintStatistics(inputPoints, centroids);
 
-		//Thread.sleep(3600 * 1000);
+		// Thread.sleep(3600 * 1000);
 		sc.close();
 	}
 }
