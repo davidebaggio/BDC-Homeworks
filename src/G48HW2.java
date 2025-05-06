@@ -308,7 +308,6 @@ public class G48HW2 {
 		Logger.getRootLogger().setLevel(Level.OFF);
 
 		SparkConf conf = new SparkConf(true).setAppName("G48HW2").setMaster("local");
-		conf.set("spark.executor.instances", "16");
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		sc.setLogLevel("OFF");
 

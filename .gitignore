@@ -9,3 +9,5 @@ bin
 *.py
 
 venv
+
+*.it
