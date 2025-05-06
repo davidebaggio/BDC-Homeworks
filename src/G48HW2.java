@@ -307,7 +307,7 @@ public class G48HW2 {
 		Logger.getLogger("akka").setLevel(Level.OFF);
 		Logger.getRootLogger().setLevel(Level.OFF);
 
-		SparkConf conf = new SparkConf(true).setAppName("G48HW2").setMaster("local");
+		SparkConf conf = new SparkConf(true).setAppName("G48HW2");
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		sc.setLogLevel("OFF");
 
