@@ -95,7 +95,7 @@ public class G48HW1 {
 	public static void main(String[] args) throws InterruptedException {
 
 		if (args.length != 4) {
-			System.err.println("Usage: GxxHW1 <input> <num_partitions> <num_clusters> <num_iterations>");
+			System.err.println("[USAGE]: G48HW1 <input_file> <L> <K> <M>");
 			System.exit(1);
 		}
 		String inputPath = args[0];
