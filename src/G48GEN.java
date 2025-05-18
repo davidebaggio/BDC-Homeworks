@@ -24,7 +24,7 @@ public class G48GEN {
 
 		double spacing = 10.0; // distance between cluster centers on x-axis
 		double sigma = 6.0; // Gaussian noise σ
-		Random rand = new Random(42);
+		Random rand = new Random(48);
 
 		try (PrintWriter pw = new PrintWriter(new FileWriter(outputFile))) {
 			// 1) All A's in cluster 0 (center 0,0)

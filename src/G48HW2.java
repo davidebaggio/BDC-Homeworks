@@ -340,12 +340,10 @@ public class G48HW2 {
 		printInfo("N = " + N + ", NA = " + NA + ", NB = " + NB);
 		printInfo("Fair Objective with Standard Centers = " + standardObjective);
 		printInfo("Fair Objective with Fair Centers = " + fairLloydObjective);
-		printInfo("Time to compute standard centers = " + ((double) (standardTime - startTime) / 1000) + "s");
-		printInfo("Time to compute fair centers = " + ((double) (lloydTime - standardTime) / 1000) + "s");
-		printInfo("Time to compute objective with standard centers = "
-				+ ((double) (stdObjectiveTime - lloydTime) / 1000) + "s");
-		printInfo("Time to compute objective with fair centers = "
-				+ ((double) (lloydObjectiveTime - stdObjectiveTime) / 1000) + "s");
+		printInfo("Time to compute standard centers = " + (standardTime - startTime) + "ms");
+		printInfo("Time to compute fair centers = " + (lloydTime - standardTime) + "ms");
+		printInfo("Time to compute objective with standard centers = " + (stdObjectiveTime - lloydTime) + "ms");
+		printInfo("Time to compute objective with fair centers = " + (lloydObjectiveTime - stdObjectiveTime) + "ms");
 
 		sc.close();
 	}
