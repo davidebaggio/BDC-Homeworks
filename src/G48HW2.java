@@ -104,12 +104,21 @@ public class G48HW2 {
 		return Vectors.dense(vec);
 	}
 
+	public static Vector zeroVector(int dim) {
+		double[] zeros = new double[dim];
+		for (int i = 0; i < dim; i++) {
+			zeros[i] = 0.0;
+		}
+		return Vectors.dense(zeros);
+	}
+
 	/*
 	 * Previous implementation of centroidSelection
 	 */
 	public static KMeansModel centroidSelectionPrev(JavaPairRDD<Integer, Tuple2<Vector, String>> clusteredPoints,
 			KMeansModel clusters, int k) {
 
+		int dim = clusters.clusterCenters()[0].size();
 		long sizeA = clusteredPoints.filter((pair) -> pair._2()._2().equals("A")).count();
 		long sizeB = clusteredPoints.filter((pair) -> pair._2()._2().equals("B")).count();
 
@@ -128,10 +137,14 @@ public class G48HW2 {
 			alpha[i] = (double) sizeAi / sizeA;
 			beta[i] = (double) sizeBi / sizeB;
 
-			muA[i] = divide(clusteredPoints.filter((pair) -> pair._1().equals(i) && pair._2()._2().equals("A"))
-					.map((pair) -> pair._2()._1()).reduce((x, y) -> add(x, y)), (double) sizeAi);
-			muB[i] = divide(clusteredPoints.filter((pair) -> pair._1().equals(i) && pair._2()._2().equals("B"))
-					.map((pair) -> pair._2()._1()).reduce((x, y) -> add(x, y)), (double) sizeBi);
+			muA[i] = (sizeAi != 0)
+					? divide(clusteredPoints.filter((pair) -> pair._1().equals(i) && pair._2()._2().equals("A"))
+							.map((pair) -> pair._2()._1()).reduce((x, y) -> add(x, y)), (double) sizeAi)
+					: zeroVector(dim);
+			muB[i] = (sizeBi != 0)
+					? divide(clusteredPoints.filter((pair) -> pair._1().equals(i) && pair._2()._2().equals("B"))
+							.map((pair) -> pair._2()._1()).reduce((x, y) -> add(x, y)), (double) sizeBi)
+					: zeroVector(dim);
 
 			l[i] = Math.sqrt(Vectors.sqdist(muA[i], muB[i]));
 
@@ -172,8 +185,6 @@ public class G48HW2 {
 		 * JavaPairRDD of
 		 * <<num of the cluster, label A or B>,
 		 * <sum vec, count vec>>
-		 * 
-		 * it depends on K so we can cache it
 		 */
 		JavaPairRDD<Tuple2<Integer, String>, Tuple2<Vector, Long>> aggregated = paired
 				.reduceByKey((a, b) -> new Tuple2<>(add(a._1(), b._1()), a._2() + b._2())).cache();
@@ -191,8 +202,6 @@ public class G48HW2 {
 		 * <num of the cluster,
 		 * <sum vec A, count vec A>,
 		 * <sum vec B, count vec B>>
-		 * 
-		 * it depends on K so we can cache it
 		 */
 		JavaPairRDD<Integer, Tuple2<Tuple2<Vector, Long>, Tuple2<Vector, Long>>> joinedStats = aggregatedA
 				.fullOuterJoin(aggregatedB)
@@ -205,8 +214,6 @@ public class G48HW2 {
 		 * JavaPairRDD of
 		 * <num of the cluster,
 		 * <vec muA, vec muB>>
-		 * 
-		 * it depends on K so we can cache it
 		 */
 		JavaPairRDD<Integer, Tuple2<Vector, Vector>> mus = joinedStats.mapValues(stats -> {
 			Vector muA = stats._1()._2() > 0 ? divide(stats._1()._1(), (double) stats._1()._2()) : zeroVector(dim);
@@ -236,15 +243,17 @@ public class G48HW2 {
 			l[i] = Math.sqrt(Vectors.sqdist(muaArr[i], mubArr[i]));
 		}
 
-		double deltaA = clusteredPoints.filter((pair) -> (pair)._2()._2().equals("A")).map((pair) -> {
-			int idx = pair._1();
-			return Vectors.sqdist(pair._2()._1(), muaArr[idx]);
-		}).reduce((a, b) -> a + b);
+		double deltaA = clusteredPoints.filter((pair) -> (pair)._2()._2().equals("A"))
+				.map((pair) -> {
+					int idx = pair._1();
+					return Vectors.sqdist(pair._2()._1(), muaArr[idx]);
+				}).reduce((a, b) -> a + b);
 
-		double deltaB = clusteredPoints.filter((pair) -> (pair)._2()._2().equals("B")).map((pair) -> {
-			int idx = pair._1();
-			return Vectors.sqdist(pair._2()._1(), mubArr[idx]);
-		}).reduce((a, b) -> a + b);
+		double deltaB = clusteredPoints.filter((pair) -> (pair)._2()._2().equals("B"))
+				.map((pair) -> {
+					int idx = pair._1();
+					return Vectors.sqdist(pair._2()._1(), mubArr[idx]);
+				}).reduce((a, b) -> a + b);
 
 		double fixedA = deltaA / sizeA;
 		double fixedB = deltaB / sizeB;
@@ -255,14 +264,6 @@ public class G48HW2 {
 			centroids[i] = divide(add(multiply(muaArr[i], l[i] - x[i]), multiply(mubArr[i], x[i])), l[i]);
 		}
 		return new KMeansModel(centroids);
-	}
-
-	public static Vector zeroVector(int dim) {
-		double[] zeros = new double[dim];
-		for (int i = 0; i < dim; i++) {
-			zeros[i] = 0.0;
-		}
-		return Vectors.dense(zeros);
 	}
 
 	/*
@@ -280,16 +281,16 @@ public class G48HW2 {
 			JavaPairRDD<Integer, Tuple2<Vector, String>> clusteredPoints = pairs.mapToPair((pair) -> {
 				int closest = closestCentroidDist(pair._1(), new KMeansModel(centroidsVector))._1();
 				return new Tuple2<>(closest, pair);
-			});
+			}).cache();
 			centroids = centroidSelection(clusteredPoints, new KMeansModel(centroidsVector), K);
+			clusteredPoints.unpersist();
 		}
-
 		return centroids.clusterCenters();
 	}
 
 	public static void main(String[] args) {
 		if (args.length != 4) {
-			System.err.println("Usage: GxxHW1 <input> <num_partitions> <num_clusters> <num_iterations>");
+			System.err.println("[USAGE]: G48HW2 <input_file> <L> <K> <M>");
 			System.exit(1);
 		}
 		String inputPath = args[0];
@@ -297,7 +298,7 @@ public class G48HW2 {
 		final int K = Integer.parseInt(args[2]);
 		final int M = Integer.parseInt(args[3]);
 		if (K <= 0 || M <= 0 || L <= 0) {
-			System.err.println("L, K and M must be positive integers");
+			System.err.println("[ERROR]: L, K and M must be positive integers");
 			System.exit(1);
 		}
 
