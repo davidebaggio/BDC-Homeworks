@@ -166,7 +166,7 @@ public class G48HW2 {
 		JavaPairRDD<Tuple2<Integer, String>, Tuple2<Vector, Long>> paired = clusteredPoints.mapToPair(pair -> {
 			Tuple2<Integer, String> key = new Tuple2<>(pair._1(), pair._2()._2());
 			return new Tuple2<>(key, new Tuple2<>(pair._2()._1(), 1L));
-		});
+		}).cache();
 
 		/*
 		 * JavaPairRDD of
@@ -180,11 +180,11 @@ public class G48HW2 {
 
 		JavaPairRDD<Integer, Tuple2<Vector, Long>> aggregatedA = aggregated
 				.filter(pair -> pair._1()._2().equals("A"))
-				.mapToPair(pair -> new Tuple2<>(pair._1()._1(), pair._2()));
+				.mapToPair(pair -> new Tuple2<>(pair._1()._1(), pair._2())).cache();
 
 		JavaPairRDD<Integer, Tuple2<Vector, Long>> aggregatedB = aggregated
 				.filter(pair -> pair._1()._2().equals("B"))
-				.mapToPair(pair -> new Tuple2<>(pair._1()._1(), pair._2()));
+				.mapToPair(pair -> new Tuple2<>(pair._1()._1(), pair._2())).cache();
 
 		/*
 		 * JavaPairRDD of
@@ -337,13 +337,14 @@ public class G48HW2 {
 
 		printInfo("Input file = " + inputPath + ", L = " + L + ", K = " + K + ", M = " + M);
 		printInfo("N = " + N + ", NA = " + NA + ", NB = " + NB);
-		printInfo("Phi(A, B, Cstd) = " + standardObjective);
-		printInfo("Phi(A, B, Cfair) = " + fairLloydObjective);
-		printInfo("Standard KMeans clustering took: " + ((double) (standardTime - startTime) / 1000) + "s");
-		printInfo("Fair KMeans clustering took:     " + ((double) (lloydTime - standardTime) / 1000) + "s");
-		printInfo("Standard KMeans objective took:  " + ((double) (stdObjectiveTime - lloydTime) / 1000) + "s");
-		printInfo(
-				"Fair KMeans objective took:      " + ((double) (lloydObjectiveTime - stdObjectiveTime) / 1000) + "s");
+		printInfo("Fair Objective with Standard Centers = " + standardObjective);
+		printInfo("Fair Objective with Fair Centers = " + fairLloydObjective);
+		printInfo("Time to compute standard centers = " + ((double) (standardTime - startTime) / 1000) + "s");
+		printInfo("Time to compute fair centers = " + ((double) (lloydTime - standardTime) / 1000) + "s");
+		printInfo("Time to compute objective with standard centers = "
+				+ ((double) (stdObjectiveTime - lloydTime) / 1000) + "s");
+		printInfo("Time to compute objective with fair centers = "
+				+ ((double) (lloydObjectiveTime - stdObjectiveTime) / 1000) + "s");
 
 		sc.close();
 	}
