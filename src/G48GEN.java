@@ -27,7 +27,7 @@ public class G48GEN {
 		Random rand = new Random(48);
 
 		try (PrintWriter pw = new PrintWriter(new FileWriter(outputFile))) {
-			// 1) All A's in cluster 0 (center 0,0)
+
 			for (int i = 0; i < NA; i++) {
 				double x = sigma * rand.nextGaussian();
 				double y = sigma * rand.nextGaussian();
@@ -35,7 +35,6 @@ public class G48GEN {
 				System.out.printf("%.5f,%.5f,A%n", x, y);
 			}
 
-			// 2) Each B goes to a random cluster 0..K-1
 			for (int i = 0; i < NB; i++) {
 				int c = rand.nextInt(K);
 				double cx = c * spacing;
