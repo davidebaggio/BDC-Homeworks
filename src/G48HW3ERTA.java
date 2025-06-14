@@ -4,12 +4,11 @@ import org.apache.spark.streaming.Durations;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import java.util.concurrent.*;
 
-
 import java.util.*;
 import java.util.concurrent.Semaphore;
 
 @SuppressWarnings("deprecation")
-public class G48HW3 {
+public class G48HW3ERTA {
 
     private static final int P = 8191;
 
@@ -100,24 +99,23 @@ public class G48HW3 {
                 stoppingSemaphore.release();
             }
         }, 60, TimeUnit.SECONDS);
-        //close the scheduler with this when streaming context is over scheduler.shutdown();
-
+        // close the scheduler with this when streaming context is over
+        // scheduler.shutdown();
 
         sc.start();
         stoppingSemaphore.acquire();
         sc.stop(false, false);
         sc.close();
 
-
         scheduler.shutdown();
 
         // Process results
         List<Map.Entry<Long, Long>> sorted = new ArrayList<>(histogram.entrySet());
         sorted.sort((a, b) -> Long.compare(b.getValue(), a.getValue()));
-        
+
         long thresholdFreq = sorted.size() >= K ? sorted.get(K - 1).getValue() : 0;
         List<Long> topK = new ArrayList<>();
-        
+
         for (Map.Entry<Long, Long> e : sorted) {
             if (e.getValue() >= thresholdFreq) {
                 topK.add(e.getKey());
@@ -162,10 +160,10 @@ public class G48HW3 {
         System.out.println("Number of Top-K Heavy Hitters = " + topK.size());
         System.out.printf("Avg Relative Error for Top-K Heavy Hitters with CM = %f%n", avgErrorCM);
         System.out.printf("Avg Relative Error for Top-K Heavy Hitters with CS = %f%n", avgErrorCS);
-        
+
         if (K <= 10) {
             System.out.println("Top-K Heavy Hitters:");
-            topK.sort(Long::compareTo);  // Sort by item value
+            topK.sort(Long::compareTo); // Sort by item value
             for (Long x : topK) {
                 System.out.printf("Item %d True Frequency = %d Estimated Frequency with CM = %d%n",
                         x, histogram.get(x), cmEstimates.get(x));

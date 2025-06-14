@@ -149,17 +149,18 @@ public class G48HW3 {
 		double avgErrorCS = totalErrorCS / topK.size();
 
 		// COMPUTE AND PRINT FINAL STATISTICS
-		System.out.printf("Port = %d, T = %d, D = %d, W = %d, K = %d%n", portExp, T, D, W, K);
+		System.out.printf("Port = %d T = %d D = %d W = %d K = %d%n", portExp, T, D, W, K);
 		System.out.println("Number of processed items = " + streamLength[0]);
 		System.out.println("Number of distinct items  = " + histogram.size());
+		System.out.println("Number of Top-K Heavy Hitters = " + topK.size());
 		System.out.printf("Avg Relative Error for Top-K Heavy Hitters with CM = %f%n", avgErrorCM);
 		System.out.printf("Avg Relative Error for Top-K Heavy Hitters with CS = %f%n", avgErrorCS);
+
 		if (K <= 10) {
-			System.out.println("Top-K heavy hitters:");
-			List<Long> topSorted = new ArrayList<>(topK);
-			Collections.sort(topSorted);
-			for (Long x : topSorted) {
-				System.out.printf("Item: %d, True frequency = %d, Estimated Frequency with CM = %d%n",
+			System.out.println("Top-K Heavy Hitters:");
+			topK.sort(Long::compareTo); // Sort by item value
+			for (Long x : topK) {
+				System.out.printf("Item %d True Frequency = %d Estimated Frequency with CM = %d%n",
 						x, histogram.get(x), cmEstimates.get(x));
 			}
 		}
